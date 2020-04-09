@@ -1,0 +1,39 @@
+
+install.packages("plyr")
+library(plyr)
+
+library(cluster)
+library(HSAUR)
+
+
+#####
+#scatter plot
+plot(Murder~X,crime_data)
+with(crime_data,text(X,Murder,labels=X,pos = 4,cex=0.5))
+z<-crime_data[,-c(1,1)]
+
+normalise<-scale(z)
+m<-apply(z,2,mean)
+s<-apply(z,2,sd)
+z<-scale(z,m,s)
+## calculating distance
+distance<-dist(z)
+print(distance,digits = 2)
+#cluster Dendogram with complete linkage
+hc.c<-hclust(distance)
+plot(hc.c,labels = crime_data$X)
+plot(hc.c,hang = -1)
+
+#cluster Dendogram with average linkage
+hc.a<-hclust(distance,method = "average")
+plot(hc.a,labels = crime_data$X)
+plot(hc.a,hang = -1)
+#cluster membership
+member.c<-cutree(hc.c,5)
+member.a<-cutree(hc.a,5)
+table(member.c,member.a)
+# cluster means 
+aggregate(z,list(member.c),mean)
+aggregate(crime_data[,-c(1,1)],list(member.c),mean)
+kc<-kmeans(z,5)
+plot(UrbanPop~Assault,crime_data,col=kc$cluster)
