@@ -1,0 +1,41 @@
+head(`50_Startups`)
+pairs(`50_Startups`[1:2])
+pairs(`50_Startups`[3:4])
+pairs(`50_Startups`[2:3])
+
+#multiple linear regression
+result <- lm(R.D.Spend~Administration+Marketing.Spend+Profit,`50_Startups`)
+result
+summary(result)
+
+#take out administration
+result <- lm(R.D.Spend~+Marketing.Spend+Profit,`50_Startups`)
+result
+summary(result)
+
+#take out marketing spend
+result <- lm(R.D.Spend~+Profit,`50_Startups`)
+result
+summary(result)
+
+a <- lm(R.D.Spend~+Profit,`50_Startups`)
+b <- lm(R.D.Spend~Administration+Marketing.Spend+Profit,`50_Startups`)
+#analysis of variance
+anova(a,b)
+
+#Prediction 95% confidence
+predict(result,data.frame(Profit=200000),interval = 'confidence')
+
+
+#multiple linear regression Profit
+result <- lm(Profit~R.D.Spend+Administration+Marketing.Spend,`50_Startups`)
+result
+summary(result)
+
+# administraion and marketing spend is not significant
+results <- lm(Profit~R.D.Spend,`50_Startups`)
+results
+summary(results)
+
+#Prediction 95% confidence
+predict(results,data.frame(R.D.Spend=200000),interval = 'confidence')
