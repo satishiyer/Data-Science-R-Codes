@@ -1,0 +1,25 @@
+library(caret)
+library(C50)
+
+str(bank.full)
+
+##Create partition 75%
+set.seed(1234)
+ind <- sample(2,nrow(bank.full), replace = T,prob = c(.80,.20))
+train <- bank.full[ind==1,]
+test <- bank.full[ind==2,]
+str(bank.full)
+
+mymode <- glm(y~ loan + age,data = bank.full, family = 'binomial')
+summary(mymode)
+
+## Predict
+a1 <- predict(mymode,train,type = 'response')
+head(a1)
+head(train)
+
+### Prediction
+pred <- predict.C5.0(model,test[,-17])
+b1 <- table(test$y,pred)
+sum(diag(a))/sum(a)
+plot(pred)
