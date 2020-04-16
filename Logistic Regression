@@ -1,0 +1,27 @@
+
+#### Credit card
+set.seed(1234)
+ind <- sample(2,nrow(creditcard), replace = T,prob = c(.80,.20))
+trainc <- creditcard[ind==1,]
+testc <- creditcard[ind==2,]
+
+mymodel <- glm(card ~ owner,data = creditcard, family = 'binomial')
+summary(mymodel)
+
+## Predict
+a1 <- predict(mymodel,trainc,type = 'response')
+a2 <- predict(mymodel,testc, type = 'response')
+head(a1)
+head((trainc))
+head(a2)
+head(testc)
+
+pred1 <- ifelse(a1>.80,"Accepted","Not Accepted")
+tab1 <- table(Predicted = pred1, Actual = trainc$card)
+tab1
+sum(diag(tab1))/sum(tab1)
+
+pred2 <- ifelse(a2>.80,"Accepted","Not Accepted")
+tab2 <- table(Predicted = pred2, Actual = testc$card)
+tab2
+sum(diag(tab2))/sum(tab2)
