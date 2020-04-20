@@ -1,0 +1,32 @@
+### Assignment Decision Tree
+str(Company_Data)
+## Data Partition
+set.seed(1234)
+pd <-sample(2,nrow(Company_Data), replace = TRUE, prob=c(0.8,0.20))
+training <- Company_Data[pd==1,]
+validate <- Company_Data[pd==2,]
+library(party)
+tree <- ctree(Sales~CompPrice+Income+Advertising+Population+Price+ShelveLoc+Age+Education+Urban+US,data = training, controls = ctree_control(mincriterion = 0.90,minsplit = 100))
+str(Company_Data)
+tree
+plot(tree)
+#predict
+predict(tree,validate)
+
+# Decision tree with rpart
+library(rpart)
+tree1 <- rpart(Sales~CompPrice+Income+Advertising+Population+Price+ShelveLoc+Age+Education+Urban+US,training)
+library(rpart.plot)
+rpart.plot(tree1)
+
+### misclassification error training
+predict(tree1,training)
+a <- table(predict(tree),training$Sales)
+print(a)
+1-sum(diag(a))/sum(a) 
+
+### misclassification error validate
+val <- predict(tree,newdata=validate)
+b <- table(val,validate$Sales)
+print(b)
+1-sum(diag(b))/sum(b)
