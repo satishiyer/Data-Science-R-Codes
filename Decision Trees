@@ -25,8 +25,41 @@ a <- table(predict(tree),training$Sales)
 print(a)
 1-sum(diag(a))/sum(a) 
 
+
+data <- Company_Data
+data$SalesF <- factor(data$Sales)
+str(data)
+intraininglocal <- createDataPartition(data$Sales,p = .80, list = F)
+training <- data[intraininglocal,]
+testing <- data[-intraininglocal,]
+
+### Model builing
+
+model <- C5.0(training$SalesF~.,data = training)
+
+#generate model
+
+summary(model)
+pred <- predict.C5.0(model,testing[,-12])
+a <- table(testing$Sales,pred)
+sum(diag(a))/sum(a)
+
 ### misclassification error validate
 val <- predict(tree,newdata=validate)
 b <- table(val,validate$Sales)
 print(b)
 1-sum(diag(b))/sum(b)
+
+###### Attribute usage: high causing sales
+
+	100.00%	ShelveLoc
+	 87.72%	Urban
+	 74.56%	US
+	 72.81%	Education
+	 50.88%	Population
+	 34.21%	Advertising
+	 33.33%	Sales
+	 14.04%	Age
+	  4.39%	Price
+
+
