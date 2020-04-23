@@ -1,0 +1,33 @@
+####### Fraud check
+str(Fraud_check)
+hist(Fraud_check$Taxable.Income)
+Risky_Good = ifelse(Fraud_check$Taxable.Income<= 30000, "Risky", "Good")
+str(Risky_Good)
+
+fc <- data.frame(Fraud_check,Risky_Good)
+traininglocal <- createDataPartition(fc$Taxable.Income,p = .80, list = F)
+training <- fc[traininglocal,]
+testing <- fc[-traininglocal,]
+
+### Model builing
+
+model <- C5.0(training$Risky_Good~.,data = training)
+
+#generate model
+
+summary(model)
+pred <- predict.C5.0(model,training[,-7])
+a <- table(training$Taxable.Income,pred)
+1-sum(diag(a))/sum(a)
+
+pred <- predict.C5.0(model,testing[,-7])
+b <- table(testing$Taxable.Income,pred)
+1-sum(diag(b))/sum(b)
+
+
+# Decision tree with rpart
+library(rpart)
+str(training)
+tree1 <- rpart(Risky_Good~Undergrad+Marital.Status+Taxable.Income+City.Population+Work.Experience+Urban,training)
+library(rpart.plot)
+rpart.plot(tree1)
