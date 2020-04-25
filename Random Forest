@@ -1,0 +1,82 @@
+######### Random Forest
+str(Fraud_check)
+hist(Fraud_check$Taxable.Income)
+Risky_Good = ifelse(Fraud_check$Taxable.Income<= 30000, "Risky", "Good")
+table(Risky_Good)
+str(Risky_Good)
+
+fc <- data.frame(Fraud_check,Risky_Good)
+traininglocal <- createDataPartition(fc$Taxable.Income,p = .80, list = F)
+training <- fc[traininglocal,]
+testing <- fc[-traininglocal,]
+
+### Model builing Random forest
+library(randomForest)
+set.seed(222)
+
+rf <- randomForest(Risky_Good~.,data = training)
+print(rf)
+attributes(rf)
+#prediction & confusion matrix
+predict(rf)
+p1 <- predict(rf,training)
+library(caret)
+confusionMatrix(p1,training$Risky_Good)
+
+p2 <- predict(rf,testing)
+confusionMatrix(p2,testing$Risky_Good)
+plot(rf)
+#### In abvove error was 0.21% we will change and add NTREE
+
+rf <- randomForest(Risky_Good~.,data = training,ntree = 300,importance = TRUE)
+print(rf)
+## Now error is 0%
+#prediction & confusion matrix
+predict(rf)
+
+p1 <- predict(rf,training)
+library(caret)
+confusionMatrix(p1,training$Risky_Good)
+
+p2 <- predict(rf,testing)
+confusionMatrix(p2,testing$Risky_Good)
+plot(rf)
+###
+###NO of trees
+hist(treesize(rf),main = "No of Nodes for Tree", col = "green")
+
+### Random forest company data
+str(`Company_Data.(1)`)
+set.seed(123)
+
+data <- `Company_Data.(1)`
+data$SalesF <- factor(data$Sales)
+str(data)
+traincom <- createDataPartition(data$SalesF,p = .80, list = F)
+table(traincom)
+trainingc <- data[traincom,]
+testingc <- data[-traincom,]
+
+
+ran <- randomForest(SalesF~., data = trainingc, ntree = 300, importance = TRUE, proximity = TRUE)
+print(ran)
+
+predict(ran)
+
+P1 <- predict(ran,trainingc)
+library(caret)
+confusionMatrix(P1,trainingc$SalesF)
+
+P2 <- predict(ran,testingc)
+confusionMatrix(P2,testingc$SalesF)
+plot(ran)
+
+###NO of trees
+hist(treesize(ran),main = "No of Nodes for Tree", col = "green")
+varImpPlot(ran)
+
+
+
+
+
+
