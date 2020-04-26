@@ -1,0 +1,45 @@
+### Neural Network Concrete
+library(MASS)
+set.seed(123)
+str(concrete)
+head(concrete,5)
+apply(concrete,2,range)
+
+max <- apply(concrete,2,max)
+min <- apply(concrete,2,min)
+
+### Normalisation
+concrete$strength <- (concrete$strength-min(concrete$strength))/max(concrete$strength)-min(concrete$strength)
+concrete$cement <- (concrete$cement-min(concrete$cement))/max(concrete$cement)-min(concrete$cement)
+concrete$slag <- (concrete$slag-min(concrete$slag))/max(concrete$slag)-min(concrete$slag)
+concrete$ash <- (concrete$ash-min(concrete$ash))/max(concrete$ash)-min(concrete$ash)
+concrete$water <- (concrete$water-min(concrete$water))/max(concrete$water)-min(concrete$water)
+concrete$superplastic <- (concrete$superplastic-min(concrete$superplastic))/max(concrete$superplastic)-min(concrete$superplastic)
+concrete$coarseagg <- (concrete$coarseagg-min(concrete$coarseagg))/max(concrete$coarseagg)-min(concrete$coarseagg)
+concrete$fineagg <- (concrete$fineagg-min(concrete$fineagg))/max(concrete$fineagg)-min(concrete$fineagg)
+concrete$age <- (concrete$age-min(concrete$age))/max(concrete$age)-min(concrete$age)
+
+
+## Data Partition
+set.seed(222)
+part <- sample(2,nrow(concrete), replace = TRUE, prob = c(0.7,0.3))
+training <- concrete[ind==1,]
+testing <- concrete[ind==2,]
+
+set.seed(333)
+n <- neuralnet(strength~cement+slag+ash+water+superplastic+coarseagg+fineagg+age, data = training, hidden = c(2,1), err.fct = "sse",linear.output = FALSE)
+plot(n)
+
+### Prediction
+## exclude y variable i.e stength
+
+output <- compute(n,training[,-9])
+
+head(output$net.result)
+head(training[1,])
+a1 <-output$net.result
+pred1 <- ifelse(a1>1,1,0)
+tab1 <- table(pred1,training$strength)
+tab1       
+1-sum(diag(tab1))/sum(tab1)
+
