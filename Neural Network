@@ -4,32 +4,90 @@ set.seed(123)
 str(concrete)
 head(concrete,5)
 apply(concrete,2,range)
+hist(concrete$strength)
+
+maxValue <- apply(concrete,2,max)
+minValue <- apply(concrete,2,min)
+
+concrete <- as.data.frame(scale(concrete,center = minValue,scale = maxValue-minValue))
 
 ## Data Partition
-ind <- sample(2,nrow(concrete), replace = TRUE, prob = c(0.7,0.3))
-training <- concrete[ind==1,]
-testing <- concrete[ind==2,]
+c <- sample(2,nrow(concrete), replace = TRUE, prob = c(0.7,0.3))
+training <- concrete[c==1,]
+testing <- concrete[c==2,]
 
-## Normalise
-m <- colMeans(training)
-m
-s <- apply(training,2,sd)
-s
-training <- scale(training,center = m, scale = s)
-training
 ## Model
 require(neuralnet)
-n <- neuralnet(strength~cement+slag+ash+water+superplastic+coarseagg+fineagg+age, data = training, hidden = c(2,1), err.fct = "sse",linear.output = FALSE)
+n <- neuralnet(strength~cement+slag+ash+water+superplastic+coarseagg+fineagg+age, data = training, hidden = 1, err.fct = "sse",linear.output = FALSE)
 plot(n)
 
 ### Prediction
 ## exclude y variable i.e stength
-
 output <- compute(n,training[,-9])
-
 head(output$net.result)
 head(training[1,])
-a1 <-output$net.result
-pred1 <- ifelse(a1>0.5,1,0)
-tab <- table(pred1)
-1-sum(diag(tab))/sum(tab)
+head(training)
+
+####unscale strength values
+pred <- output$net.result*(max(training$strength)-min(training$strength))+min(training$strength)
+act <- training$strength*(max(training$strength)-min(training$strength))+min(training$strength)
+
+mse <- sum((pred-act)^2)/nrow(training)
+mse
+plot(training$strength,pred,col='blue',main="Real vs Predicted",pch=1,cex=1,abline(0,2,col="black"))
+
+
+### Forest Fires
+set.seed(123)
+data <- forestfires
+str(data)
+data$area <- (data$area-min(data$area))/max(data$area)-min(data$area)
+data$FFMC <- (data$FFMC-min(data$FFMC))/max(data$FFMC)-min(data$FFMC)
+data$DMC <- (data$DMC-min(data$DMC))/max(data$DMC)-min(data$DMC)
+data$DC <- (data$DC-min(data$DC))/max(data$DC)-min(data$DC)
+data$ISI <- (data$ISI-min(data$ISI))/max(data$ISI)-min(data$ISI)
+data$temp <- (data$temp-min(data$temp))/max(data$temp)-min(data$temp)
+data$RH <- (data$RH-min(data$RH))/max(data$RH)-min(data$RH)
+data$wind <- (data$wind-min(data$wind))/max(data$wind)-min(data$wind)
+data$rain <- (data$rain-min(data$rain))/max(data$rain)-min(data$rain)
+
+require(keras)
+require(dplyr)
+data %>% mutate_if(is.factor,as.numeric)
+str(data)
+
+## adding all variables
+all.vars<-colnames(data)
+pv <- all.vars[!all.vars%in% "area"]
+pv <- paste(pv,collapse = "+")
+form=as.formula(paste("area~",pv,collapse = "+"))
+
+
+## Data Partition
+p <- sample(2,nrow(data), replace = TRUE, prob = c(0.7,0.3))
+trainff <- data[p==1,]
+testingff <- data[p==2,]
+
+require(neuralnet)
+nn <- neuralnet(area~ FFMC + DMC + DC + ISI + temp + RH + wind + 
+                  rain + dayfri + daymon + daysat + daysun + daythu + daytue + 
+                  daywed + monthapr + monthaug + monthdec + monthfeb + monthjan + 
+                  monthjul + monthjun + monthmar + monthmay + monthnov + monthoct + 
+                  monthsep, data = trainff, hidden = c(4,2), err.fct = "sse",linear.output = FALSE)
+plot(nn)
+
+### Prediction
+## exclude variable i.e area
+out <- compute(nn,trainff[,-11])
+head(out$net.result)
+head(trainff[1,])
+head(trainff)
+
+####unscale area values
+prediction <- out$net.result*(trainff$area-min(trainff$area))/max(trainff$area)-min(trainff$area)
+actual <- trainff$area*(trainff$area-min(trainff$area))/max(trainff$area)-min(trainff$area)
+
+mse <- sum((prediction-actual)^2)/nrow(trainff)
+mse
+plot(trainff$area,prediction,col='blue',main="Real vs Predicted",pch=1,cex=1,abline(0,2,col="black"))
+
