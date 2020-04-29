@@ -69,4 +69,8 @@ margarine <- sort(subset(rules, subset = rhs %in% "margarine="))
 summary(margarine)
 inspect(margarine)
 plot(margarine,  measure=c("support", "confidence"), shading="lift")
+# plot for subrules
+plot(margarine,method="graph",interactive=FALSE,shading="lift")
+
+plot(margarine, method="grouped", measure="support")
 
