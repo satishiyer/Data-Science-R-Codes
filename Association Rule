@@ -36,3 +36,37 @@ childbks<-apriori(mydata,parameter = list(minlen=2,maxlen=3,conf=.7),
                   appearance = list(rhs=c("ChildBks=1"),lhs=c("ItalCook=1","RefBks=1",
                   "CookBks=1","ArtBks=1","GeogBks=1"),default="none"))
 inspect(childbks)
+
+
+# Association Rules Groceries
+library(arules)
+groceries<-read.csv("C:/Users/Satish Iyer/Downloads/groceries.csv",header = T,colClasses = "factor")
+str(groceries)
+head(groceries,5)
+rules <-apriori(groceries)
+inspect(rules)
+rules <- apriori(groceries, parameter = list(support = 0.009, confidence = 0.25, minlen = 2))  
+summary(groceries)
+
+inspect(sort(sort(rules, by ="support"),by ="confidence")[1:5])
+require(arulesViz)
+plot(rules, measure=c("support", "confidence"), shading="lift", interactive=FALSE)
+
+#Find Interesting rules 1
+readysoups <- sort(subset(rules, subset = rhs %in% "ready.soups="))
+summary(readysoups)
+inspect(readysoups)
+plot(readysoups,  measure=c("support", "confidence"), shading="lift")
+
+#Find Interesting rules 2
+bread <- sort(subset(rules, subset = rhs %in% "semi.finished.bread="))
+summary(bread)
+inspect(bread)
+plot(bread,  measure=c("support", "confidence"), shading="lift")
+
+#Find Interesting rules 3
+margarine <- sort(subset(rules, subset = rhs %in% "margarine="))
+summary(margarine)
+inspect(margarine)
+plot(margarine,  measure=c("support", "confidence"), shading="lift")
+
