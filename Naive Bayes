@@ -1,0 +1,35 @@
+### Naive Bayes
+library(naivebayes)
+require(naivebayes)
+require(ggplot2)
+library(ggplot2)
+library(psych)
+sal <- SalaryData_Test
+str(sal)
+xtabs(~Salary+hoursperweek+occupation, data = sal)
+xtabs(~Salary+occupation, data = sal)
+
+#### Visualization
+pairs.panels(sal[-14])
+sal %>% 
+  ggplot(aes(x=Salary ,y = sex, fill = Salary))+ 
+  geom_boxplot()+
+  ggtitle("Box Plot")
+
+### Data Partition
+set.seed(12234)
+ind <- sample(2,nrow(sal),replace = T, prob = c(0.8,0.2))
+train <- sal[ind==1,]
+test <- sal[ind==2,]
+### Naive Bayes Model
+model <- naive_bayes(Salary~.,data = train)
+model
+plot(model)
+
+## Predict
+p <- predict(model,train, type ='prob')
+head(cbind(p,train))
+p1 <- predict(model,train)
+(tab <- table(p1,train$Salary))
+(tab <- table(p1,train$occupation))
+(tab <- table(p1,train$education))
