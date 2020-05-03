@@ -1,0 +1,39 @@
+library(forecast)
+library(tseries)
+
+### ARIMA Autoregressive Integrated Moving Average
+salesdata <- CocaCola_Sales_Rawdata
+str(salesdata)
+model <- ts(salesdata$Sales, start = c(1986),frequency = 4)
+model1 <-auto.arima(model)
+model1
+attributes(model1)
+
+#ACF and PACF plot
+acf(model1$residuals,main = 'Correlogram')
+pacf(model1$residuals,main = 'Partial Correlogram')
+
+#Ljung-Box test
+Box.test(model1$residuals, lag=20,type = 'Ljung-Box')
+
+# Residual Plot
+hist(model1$residuals,col = 'red',xlab = 'Error',main = 'Histogram of Residuals',freq = FALSE)
+lines(density(model1$residuals))
+## Forecast
+f <- forecast(model1,4)
+library(ggplot2)
+require(ggplot2)
+autoplot(f)
+
+########## Another method
+autoplot(model)
+adf.test(model,k = 4)
+modeld1 <- diff(model,difference = 1)
+adf.test(modeld1, k = 4)
+modeld2 <- diff(model,difference = 2)
+adf.test(modeld2, k = 4)
+autoplot(modeld2)
+pacf(modeld2)
+acf(modeld2)
+tsmod <- Arima(y = model, order = c(0,2,0))
+forecast(tsmod, h=4)
